@@ -39,6 +39,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.internal.Util
 import com.squareup.moshi.kotlin.codegen.api.FromJsonComponent.ParameterOnly
 import com.squareup.moshi.kotlin.codegen.api.FromJsonComponent.ParameterProperty
@@ -55,7 +56,8 @@ private const val TO_STRING_SIZE_BASE = TO_STRING_PREFIX.length + 1 // 1 is the 
 internal class AdapterGenerator(
     private val target: TargetType,
     private val propertyList: List<PropertyGenerator>,
-    private val ignoreToJson: Boolean
+    private val readOnly: Boolean,
+    private val writeOnly: Boolean
 ) {
 
   companion object {
@@ -240,15 +242,17 @@ internal class AdapterGenerator(
       }
     }
 
-    result.addProperty(optionsProperty)
+    if (!writeOnly) {
+      result.addProperty(optionsProperty)
+    }
     for (uniqueAdapter in nonTransientProperties.distinctBy { it.delegateKey }) {
       result.addProperty(uniqueAdapter.delegateKey.generateProperty(
           nameAllocator, typeRenderer, moshiParam, uniqueAdapter.name))
     }
 
     result.addFunction(generateToStringFun())
-    result.addFunction(generateFromJsonFun(result))
-    result.addFunction(generateToJsonFun(ignoreToJson))
+    result.addFunction(generateFromJsonFun(result, writeOnly))
+    result.addFunction(generateToJsonFun(readOnly))
 
     return result.build()
   }
@@ -281,11 +285,17 @@ internal class AdapterGenerator(
         .build()
   }
 
-  private fun generateFromJsonFun(classBuilder: TypeSpec.Builder): FunSpec {
+  private fun generateFromJsonFun(classBuilder: TypeSpec.Builder, writeOnly: Boolean): FunSpec {
     val result = FunSpec.builder("fromJson")
         .addModifiers(KModifier.OVERRIDE)
         .addParameter(readerParam)
         .returns(originalTypeName)
+
+    if (writeOnly) {
+      result.addStatement("throw·%T(%S)", JsonDataException::class,
+              "$adapterName is write only. Annotation is set with writeOnly=true")
+      return result.build()
+    }
 
     for (property in nonTransientProperties) {
       result.addCode("%L", property.generateLocalProperty())
@@ -542,13 +552,14 @@ internal class AdapterGenerator(
         MOSHI_UTIL, property.localName, property.jsonName, reader)
   }
 
-  private fun generateToJsonFun(ignoreToJson: Boolean): FunSpec {
+  private fun generateToJsonFun(readOnly: Boolean): FunSpec {
     val result = FunSpec.builder("toJson")
         .addModifiers(KModifier.OVERRIDE)
         .addParameter(writerParam)
         .addParameter(valueParam)
-    if (ignoreToJson) {
-      result.addComment("ignoreToJson specified!")
+    if (readOnly) {
+      result.addStatement("throw·%T(%S)", JsonDataException::class,
+              "$adapterName is read only. Annotation is set with readOnly=true")
     } else {
       result.beginControlFlow("if (%N == null)", valueParam)
       result.addStatement("throw·%T(%S)", NullPointerException::class,

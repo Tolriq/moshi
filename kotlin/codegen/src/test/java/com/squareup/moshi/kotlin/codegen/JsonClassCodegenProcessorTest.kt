@@ -399,6 +399,59 @@ class JsonClassCodegenProcessorTest {
   }
 
   @Test
+  fun `ReadOnly adapter should throw on read`() {
+    val result = compile(kotlin("source.kt",
+                """
+      import com.squareup.moshi.JsonClass
+      
+      typealias FirstName = String
+      typealias LastName = String
+
+      @JsonClass(generateAdapter = true, readOnly = true)
+      data class Person(val firstName: FirstName, val lastName: LastName, val hairColor: String)
+      """
+    ))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+
+    // TODO: Check proper throw generation
+  }
+
+  @Test
+  fun `WriteOnly adapter should throw on write`() {
+    val result = compile(kotlin("source.kt",
+                """
+      import com.squareup.moshi.JsonClass
+      
+      typealias FirstName = String
+      typealias LastName = String
+
+      @JsonClass(generateAdapter = true, writeOnly = true)
+      data class Person(val firstName: FirstName, val lastName: LastName, val hairColor: String)
+      """
+    ))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+
+    // TODO: Check proper throw generation
+  }
+
+  @Test
+  fun `Adapter can't be readOnly and writeOnly`() {
+    val result = compile(kotlin("source.kt",
+                """
+      import com.squareup.moshi.JsonClass
+      
+      typealias FirstName = String
+      typealias LastName = String
+
+      @JsonClass(generateAdapter = true, writeOnly = true, readOnly = true)
+      data class Person(val firstName: FirstName, val lastName: LastName, val hairColor: String)
+      """
+    ))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages).contains("@JsonClass can't be both readOnly and writeOnly")
+  }
+
+  @Test
   fun `Processor should generate comprehensive proguard rules`() {
     val result = compile(kotlin("source.kt",
         """
