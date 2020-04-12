@@ -45,6 +45,8 @@ public @interface JsonClass {
    */
   boolean generateAdapter();
 
+  boolean ignoreToJson() default false;
+
   /**
    * An optional custom generator tag used to indicate which generator should be used. If empty,
    * Moshi's annotation processor will generate an adapter for the annotated type. If not empty,

@@ -112,7 +112,7 @@ class JsonClassCodegenProcessor : AbstractProcessor() {
       }
       val jsonClass = type.getAnnotation(annotation)
       if (jsonClass.generateAdapter && jsonClass.generator.isEmpty()) {
-        val generator = adapterGenerator(type, cachedClassInspector) ?: continue
+        val generator = adapterGenerator(type, cachedClassInspector, jsonClass.ignoreToJson) ?: continue
         val preparedAdapter = generator
             .prepare { spec ->
               spec.toBuilder()
@@ -141,7 +141,8 @@ class JsonClassCodegenProcessor : AbstractProcessor() {
 
   private fun adapterGenerator(
       element: TypeElement,
-      cachedClassInspector: MoshiCachedClassInspector
+      cachedClassInspector: MoshiCachedClassInspector,
+      ignoreToJson: Boolean
   ): AdapterGenerator? {
     val type = targetType(messager, elements, types, element, cachedClassInspector) ?: return null
 
@@ -172,6 +173,6 @@ class JsonClassCodegenProcessor : AbstractProcessor() {
       }
     }
 
-    return AdapterGenerator(type, sortedProperties)
+    return AdapterGenerator(type, sortedProperties, ignoreToJson)
   }
 }

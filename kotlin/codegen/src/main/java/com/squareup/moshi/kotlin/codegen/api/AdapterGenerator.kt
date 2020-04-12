@@ -54,7 +54,8 @@ private const val TO_STRING_SIZE_BASE = TO_STRING_PREFIX.length + 1 // 1 is the 
 /** Generates a JSON adapter for a target type. */
 internal class AdapterGenerator(
     private val target: TargetType,
-    private val propertyList: List<PropertyGenerator>
+    private val propertyList: List<PropertyGenerator>,
+    private val ignoreToJson: Boolean
 ) {
 
   companion object {
@@ -247,7 +248,7 @@ internal class AdapterGenerator(
 
     result.addFunction(generateToStringFun())
     result.addFunction(generateFromJsonFun(result))
-    result.addFunction(generateToJsonFun())
+    result.addFunction(generateToJsonFun(ignoreToJson))
 
     return result.build()
   }
@@ -541,26 +542,28 @@ internal class AdapterGenerator(
         MOSHI_UTIL, property.localName, property.jsonName, reader)
   }
 
-  private fun generateToJsonFun(): FunSpec {
+  private fun generateToJsonFun(ignoreToJson: Boolean): FunSpec {
     val result = FunSpec.builder("toJson")
         .addModifiers(KModifier.OVERRIDE)
         .addParameter(writerParam)
         .addParameter(valueParam)
+    if (ignoreToJson) {
+      result.addComment("ignoreToJson specified!")
+    } else {
+      result.beginControlFlow("if (%N == null)", valueParam)
+      result.addStatement("throw·%T(%S)", NullPointerException::class,
+              "${valueParam.name} was null! Wrap in .nullSafe() to write nullable values.")
+      result.endControlFlow()
 
-    result.beginControlFlow("if (%N == null)", valueParam)
-    result.addStatement("throw·%T(%S)", NullPointerException::class,
-        "${valueParam.name} was null! Wrap in .nullSafe() to write nullable values.")
-    result.endControlFlow()
-
-    result.addStatement("%N.beginObject()", writerParam)
-    nonTransientProperties.forEach { property ->
-      // We manually put in quotes because we know the jsonName is already escaped
-      result.addStatement("%N.name(%S)", writerParam, property.jsonName)
-      result.addStatement("%N.toJson(%N, %N.%N)",
-          nameAllocator[property.delegateKey], writerParam, valueParam, property.name)
+      result.addStatement("%N.beginObject()", writerParam)
+      nonTransientProperties.forEach { property ->
+        // We manually put in quotes because we know the jsonName is already escaped
+        result.addStatement("%N.name(%S)", writerParam, property.jsonName)
+        result.addStatement("%N.toJson(%N, %N.%N)",
+                nameAllocator[property.delegateKey], writerParam, valueParam, property.name)
+      }
+      result.addStatement("%N.endObject()", writerParam)
     }
-    result.addStatement("%N.endObject()", writerParam)
-
     return result.build()
   }
 }
