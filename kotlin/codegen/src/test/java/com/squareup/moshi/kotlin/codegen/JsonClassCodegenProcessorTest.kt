@@ -22,6 +22,7 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.contentOf
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -413,7 +414,12 @@ class JsonClassCodegenProcessorTest {
     ))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
 
-    // TODO: Check proper throw generation
+    result.generatedFiles.filter { it.name == "PersonJsonAdapter.kt" }.forEach { generatedFile ->
+      assertThat(contentOf(generatedFile)).contains("""
+  override fun toJson(writer: JsonWriter, value: Person?) {
+    throw UnsupportedOperationException("PersonJsonAdapter is read only. Annotation is set with readOnly=true")
+  }""")
+    }
   }
 
   @Test
@@ -430,8 +436,12 @@ class JsonClassCodegenProcessorTest {
       """
     ))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
-
-    // TODO: Check proper throw generation
+    result.generatedFiles.filter { it.name == "PersonJsonAdapter.kt" }.forEach { generatedFile ->
+      assertThat(contentOf(generatedFile)).contains("""
+  override fun fromJson(reader: JsonReader): Person {
+    throw UnsupportedOperationException("PersonJsonAdapter is write only. Annotation is set with writeOnly=true")
+  }""")
+    }
   }
 
   @Test

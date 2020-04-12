@@ -39,7 +39,6 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.internal.Util
 import com.squareup.moshi.kotlin.codegen.api.FromJsonComponent.ParameterOnly
 import com.squareup.moshi.kotlin.codegen.api.FromJsonComponent.ParameterProperty
@@ -292,7 +291,7 @@ internal class AdapterGenerator(
         .returns(originalTypeName)
 
     if (writeOnly) {
-      result.addStatement("throw·%T(%S)", JsonDataException::class,
+      result.addStatement("throw·%T(%S)", UnsupportedOperationException::class,
               "$adapterName is write only. Annotation is set with writeOnly=true")
       return result.build()
     }
@@ -558,23 +557,24 @@ internal class AdapterGenerator(
         .addParameter(writerParam)
         .addParameter(valueParam)
     if (readOnly) {
-      result.addStatement("throw·%T(%S)", JsonDataException::class,
-              "$adapterName is read only. Annotation is set with readOnly=true")
-    } else {
-      result.beginControlFlow("if (%N == null)", valueParam)
-      result.addStatement("throw·%T(%S)", NullPointerException::class,
-              "${valueParam.name} was null! Wrap in .nullSafe() to write nullable values.")
-      result.endControlFlow()
-
-      result.addStatement("%N.beginObject()", writerParam)
-      nonTransientProperties.forEach { property ->
-        // We manually put in quotes because we know the jsonName is already escaped
-        result.addStatement("%N.name(%S)", writerParam, property.jsonName)
-        result.addStatement("%N.toJson(%N, %N.%N)",
-                nameAllocator[property.delegateKey], writerParam, valueParam, property.name)
-      }
-      result.addStatement("%N.endObject()", writerParam)
+      result.addStatement("throw·%T(%S)", UnsupportedOperationException::class,
+          "$adapterName is read only. Annotation is set with readOnly=true")
+      return result.build()
     }
+    result.beginControlFlow("if (%N == null)", valueParam)
+    result.addStatement("throw·%T(%S)", NullPointerException::class,
+        "${valueParam.name} was null! Wrap in .nullSafe() to write nullable values.")
+    result.endControlFlow()
+
+    result.addStatement("%N.beginObject()", writerParam)
+    nonTransientProperties.forEach { property ->
+      // We manually put in quotes because we know the jsonName is already escaped
+      result.addStatement("%N.name(%S)", writerParam, property.jsonName)
+      result.addStatement("%N.toJson(%N, %N.%N)",
+          nameAllocator[property.delegateKey], writerParam, valueParam, property.name)
+    }
+    result.addStatement("%N.endObject()", writerParam)
+
     return result.build()
   }
 }
