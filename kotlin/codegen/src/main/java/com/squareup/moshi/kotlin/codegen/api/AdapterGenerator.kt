@@ -291,8 +291,12 @@ internal class AdapterGenerator(
         .returns(originalTypeName)
 
     if (writeOnly) {
-      result.addStatement("throw·%T(%S)", UnsupportedOperationException::class,
-              "$adapterName is write only. Annotation is set with writeOnly=true")
+      result.addStatement("throw·%T(%M(%L)·{ append(%S).append(%S) })",
+              UnsupportedOperationException::class,
+              MemberName("kotlin.text", "buildString"),
+              adapterName.length + 53,
+              adapterName,
+              " is write only. Annotation is set with writeOnly=true")
       return result.build()
     }
 
@@ -557,8 +561,12 @@ internal class AdapterGenerator(
         .addParameter(writerParam)
         .addParameter(valueParam)
     if (readOnly) {
-      result.addStatement("throw·%T(%S)", UnsupportedOperationException::class,
-          "$adapterName is read only. Annotation is set with readOnly=true")
+      result.addStatement("throw·%T(%M(%L)·{ append(%S).append(%S) })",
+              UnsupportedOperationException::class,
+              MemberName("kotlin.text", "buildString"),
+              adapterName.length + 51,
+              adapterName,
+              " is read only. Annotation is set with readOnly=true")
       return result.build()
     }
     result.beginControlFlow("if (%N == null)", valueParam)

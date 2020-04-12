@@ -417,7 +417,8 @@ class JsonClassCodegenProcessorTest {
     result.generatedFiles.filter { it.name == "PersonJsonAdapter.kt" }.forEach { generatedFile ->
       assertThat(contentOf(generatedFile)).contains("""
   override fun toJson(writer: JsonWriter, value: Person?) {
-    throw UnsupportedOperationException("PersonJsonAdapter is read only. Annotation is set with readOnly=true")
+    throw UnsupportedOperationException(buildString(68) {
+        append("PersonJsonAdapter").append(" is read only. Annotation is set with readOnly=true") })
   }""")
     }
   }
@@ -438,8 +439,9 @@ class JsonClassCodegenProcessorTest {
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
     result.generatedFiles.filter { it.name == "PersonJsonAdapter.kt" }.forEach { generatedFile ->
       assertThat(contentOf(generatedFile)).contains("""
-  override fun fromJson(reader: JsonReader): Person {
-    throw UnsupportedOperationException("PersonJsonAdapter is write only. Annotation is set with writeOnly=true")
+    throw UnsupportedOperationException(buildString(70) {
+        append("PersonJsonAdapter").append(" is write only. Annotation is set with writeOnly=true")
+        })
   }""")
     }
   }
