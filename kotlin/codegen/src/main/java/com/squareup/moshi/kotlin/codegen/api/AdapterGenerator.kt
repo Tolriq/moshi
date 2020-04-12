@@ -291,12 +291,15 @@ internal class AdapterGenerator(
         .returns(originalTypeName)
 
     if (writeOnly) {
-      result.addStatement("throw·%T(%M(%L)·{ append(%S).append(%S) })",
+      val name = originalRawTypeName.simpleNames.joinToString(".")
+      result.addStatement("throw·%T(%M(%L)·{ append(%S).append(%S).append('%L').append(%S) })",
               UnsupportedOperationException::class,
               MemberName("kotlin.text", "buildString"),
-              adapterName.length + 53,
-              adapterName,
-              " is write only. Annotation is set with writeOnly=true")
+              TO_STRING_SIZE_BASE + name.length + 53,
+              TO_STRING_PREFIX,
+              name,
+              ")",
+              " is write only. @JsonClass is set with writeOnly=true")
       return result.build()
     }
 
@@ -561,12 +564,15 @@ internal class AdapterGenerator(
         .addParameter(writerParam)
         .addParameter(valueParam)
     if (readOnly) {
-      result.addStatement("throw·%T(%M(%L)·{ append(%S).append(%S) })",
+      val name = originalRawTypeName.simpleNames.joinToString(".")
+      result.addStatement("throw·%T(%M(%L)·{ append(%S).append(%S).append('%L').append(%S) })",
               UnsupportedOperationException::class,
               MemberName("kotlin.text", "buildString"),
-              adapterName.length + 51,
-              adapterName,
-              " is read only. Annotation is set with readOnly=true")
+              TO_STRING_SIZE_BASE + name.length + 51,
+              TO_STRING_PREFIX,
+              name,
+              ")",
+              " is read only. @JsonClass is set with readOnly=true")
       return result.build()
     }
     result.beginControlFlow("if (%N == null)", valueParam)
