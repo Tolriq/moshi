@@ -56,7 +56,8 @@ internal class AdapterGenerator(
     private val target: TargetType,
     private val propertyList: List<PropertyGenerator>,
     private val readOnly: Boolean,
-    private val writeOnly: Boolean
+    private val writeOnly: Boolean,
+    private val allowNull: Boolean
 ) {
 
   companion object {
@@ -250,7 +251,7 @@ internal class AdapterGenerator(
     }
 
     result.addFunction(generateToStringFun())
-    result.addFunction(generateFromJsonFun(result, writeOnly))
+    result.addFunction(generateFromJsonFun(result, writeOnly, allowNull))
     result.addFunction(generateToJsonFun(readOnly))
 
     return result.build()
@@ -284,7 +285,7 @@ internal class AdapterGenerator(
         .build()
   }
 
-  private fun generateFromJsonFun(classBuilder: TypeSpec.Builder, writeOnly: Boolean): FunSpec {
+  private fun generateFromJsonFun(classBuilder: TypeSpec.Builder, writeOnly: Boolean, allowNull: Boolean): FunSpec {
     val result = FunSpec.builder("fromJson")
         .addModifiers(KModifier.OVERRIDE)
         .addParameter(readerParam)
@@ -401,7 +402,7 @@ internal class AdapterGenerator(
       // Proceed as usual
       if (property.hasLocalIsPresentName || property.hasConstructorDefault) {
         result.beginControlFlow("%L ->", propertyIndex)
-        if (property.delegateKey.nullable) {
+        if (property.delegateKey.nullable || allowNull) {
           result.addStatement("%N = %N.fromJson(%N)",
               property.localName, nameAllocator[property.delegateKey], readerParam)
         } else {
@@ -420,7 +421,7 @@ internal class AdapterGenerator(
         }
         result.endControlFlow()
       } else {
-        if (property.delegateKey.nullable) {
+        if (property.delegateKey.nullable || allowNull) {
           result.addStatement("%L -> %N = %N.fromJson(%N)",
               propertyIndex, property.localName, nameAllocator[property.delegateKey], readerParam)
         } else {

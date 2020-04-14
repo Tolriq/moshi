@@ -119,7 +119,7 @@ class JsonClassCodegenProcessor : AbstractProcessor() {
           continue
         }
         val generator = adapterGenerator(type, cachedClassInspector,
-                jsonClass.readOnly, jsonClass.writeOnly) ?: continue
+                jsonClass.readOnly, jsonClass.writeOnly, jsonClass.allowNull) ?: continue
         val preparedAdapter = generator
             .prepare { spec ->
               spec.toBuilder()
@@ -150,7 +150,8 @@ class JsonClassCodegenProcessor : AbstractProcessor() {
       element: TypeElement,
       cachedClassInspector: MoshiCachedClassInspector,
       readOnly: Boolean,
-      writeOnly: Boolean
+      writeOnly: Boolean,
+      allowNull: Boolean
   ): AdapterGenerator? {
     val type = targetType(messager, elements, types, element, cachedClassInspector) ?: return null
 
@@ -181,6 +182,6 @@ class JsonClassCodegenProcessor : AbstractProcessor() {
       }
     }
 
-    return AdapterGenerator(type, sortedProperties, readOnly, writeOnly)
+    return AdapterGenerator(type, sortedProperties, readOnly, writeOnly, allowNull)
   }
 }
