@@ -80,7 +80,9 @@ internal data class ProguardConfig(
       //     synthetic <init>(...);
       // }
       //
+      appendln("-if class $targetName")
       appendln("-keepnames class kotlin.jvm.internal.DefaultConstructorMarker")
+      appendln("-if class $targetName")
       appendln("-keepclassmembers class $targetName {")
       val allParams = targetConstructorParams.toMutableList()
       val maskCount = if (targetConstructorParams.isEmpty()) {
@@ -94,7 +96,6 @@ internal data class ProguardConfig(
       allParams += "kotlin.jvm.internal.DefaultConstructorMarker"
       val params = allParams.joinToString(",")
       appendln("    public synthetic <init>($params);")
-      appendln("    public <init>($params);")
       appendln("}")
     }
   }
