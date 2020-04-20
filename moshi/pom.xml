@@ -14,6 +14,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>androidx.annotation</groupId>
+      <artifactId>annotation</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+    <dependency>
       <groupId>com.squareup.okio</groupId>
       <artifactId>okio</artifactId>
     </dependency>
@@ -33,6 +38,14 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <repositories>
+    <repository>
+      <id>google</id>
+      <name>Google</name>
+      <url>https://maven.google.com/</url>
+    </repository>
+  </repositories>
 
   <build>
     <plugins>

@@ -15,6 +15,7 @@
  */
 package com.squareup.moshi.internal;
 
+import androidx.annotation.Keep;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonClass;
 import com.squareup.moshi.JsonDataException;
@@ -54,7 +55,7 @@ public final class Util {
     Class<? extends Annotation> metadata = null;
     try {
       //noinspection unchecked
-      metadata = (Class<? extends Annotation>) Class.forName("kotlin.Metadata");
+      metadata = (Class<? extends Annotation>) Class.forName(getKotlinMetadataClassNameForReflection());
     } catch (ClassNotFoundException ignored) {
     }
     METADATA = metadata;
@@ -67,6 +68,11 @@ public final class Util {
     } catch (ClassNotFoundException ignored) {
     }
     DEFAULT_CONSTRUCTOR_MARKER = defaultConstructorMarker;
+  }
+
+  @Keep /* Kept to avoid optimizing out reflection. */
+  private static String getKotlinMetadataClassNameForReflection() {
+    return "kotlin.Metadata";
   }
 
   private Util() {
