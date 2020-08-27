@@ -1157,6 +1157,99 @@ public final class JsonReaderTest {
     reader.endObject();
   }
 
+  @Test public void promoteStringNameToValue() throws IOException {
+    JsonReader reader = newReader("{\"a\":\"b\"}");
+    reader.beginObject();
+    reader.promoteNameToValue();
+    assertEquals("a", reader.nextString());
+    assertEquals("b", reader.nextString());
+    reader.endObject();
+  }
+
+  @Test public void promoteDoubleNameToValue() throws IOException {
+    JsonReader reader = newReader("{\"5\":\"b\"}");
+    reader.beginObject();
+    reader.promoteNameToValue();
+    assertEquals(5.0, reader.nextDouble(), 0.0);
+    assertEquals("b", reader.nextString());
+    reader.endObject();
+  }
+
+  @Test public void promoteLongNameToValue() throws IOException {
+    JsonReader reader = newReader("{\"5\":\"b\"}");
+    reader.beginObject();
+    reader.promoteNameToValue();
+    assertEquals(5L, reader.nextLong());
+    assertEquals("b", reader.nextString());
+    reader.endObject();
+  }
+
+  @Test public void promoteNullNameToValue() throws IOException {
+    JsonReader reader = newReader("{\"null\":\"b\"}");
+    reader.beginObject();
+    reader.promoteNameToValue();
+    try {
+      reader.nextNull();
+      fail();
+    } catch (JsonDataException expected) {
+    }
+    assertEquals("null", reader.nextString());
+  }
+
+  @Test public void promoteBooleanNameToValue() throws IOException {
+    JsonReader reader = newReader("{\"true\":\"b\"}");
+    reader.beginObject();
+    reader.promoteNameToValue();
+    try {
+      reader.nextBoolean();
+      fail();
+    } catch (JsonDataException expected) {
+    }
+    assertEquals("true", reader.nextString());
+  }
+
+  @Test public void promoteBooleanNameToValueCannotBeReadAsName() throws IOException {
+    JsonReader reader = newReader("{\"true\":\"b\"}");
+    reader.beginObject();
+    reader.promoteNameToValue();
+    try {
+      reader.nextName();
+      fail();
+    } catch (JsonDataException expected) {
+    }
+    assertEquals("true", reader.nextString());
+  }
+
+  @Test public void promoteSkippedNameToValue() throws IOException {
+    JsonReader reader = newReader("{\"true\":\"b\"}");
+    reader.beginObject();
+    reader.promoteNameToValue();
+    reader.skipValue();
+    assertEquals("b", reader.nextString());
+  }
+
+  @Test public void promoteNameToValueAtEndOfObject() throws IOException {
+    JsonReader reader = newReader("{}");
+    reader.beginObject();
+    reader.promoteNameToValue();
+    assertThat(reader.hasNext()).isFalse();
+    reader.endObject();
+  }
+
+  @Test public void optionsStrings() {
+    String[] options = new String[] { "a", "b", "c" };
+    JsonReader.Options abc = JsonReader.Options.of("a", "b", "c");
+    List<String> strings = abc.strings();
+    assertThat(options).containsExactlyElementsOf(strings);
+    try {
+      // Confirm it's unmodifiable and we can't mutate the original underlying array
+      strings.add("d");
+      fail();
+    } catch (UnsupportedOperationException expected) {
+
+    }
+  }
+
   /** Peek a value, then read it, recursively. */
   private void readValue(JsonReader reader, boolean peekJsonFirst) throws IOException {
     JsonReader.Token token = reader.peek();

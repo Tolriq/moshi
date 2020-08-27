@@ -1,6 +1,32 @@
 Change Log
 ==========
 
+## Version 1.10.0
+
+_2020-08-26_
+
+ * New: Upgrade to Kotlin 1.4.0.
+ * New: `JsonReader.promoteNameToValue()` makes it easier to build custom `Map` adapters.
+ * New: `Options.strings()`.
+ * New: `PolymorphicJsonAdapterFactory.withFallbackJsonAdapter()` makes it possible to handle
+   unrecognized types when encoding and decoding.
+ * New: Add `JsonWriter.jsonValue` API
+ * New: Code gen now generates precise proguard rules on-the-fly.
+ * New: Improve error when incorrectly trying to use a collection class like `ArrayList` instead of `List`
+ * Fix: Prevent R8 from keeping all `@Metadata` annotations
+ * Fix: Avoid VerifyErrors on Android 4.4 devices when using R8
+ * Fix: Fix resolution of types in superclass settable properties
+
+## Version 1.9.3
+
+_2020-06-11_
+
+ * Fix: Tweak a shrinker rule to mitigate an R8 bug which was causing classes unrelated to the Kotlin adpater code generation to be retained.
+ * Fix: Ensure that the Kotlin adapter code generation does not line wrap in the middle of a string if your JSON keys contain spaces.
+ * Fix: Strip type annotations before emitting type references like `Foo::class` in the Kotlin adapter code generation.
+ * Fix: Separate the runtime check for Kotlin's `DefaultConstructorMarker` from the check for `Metadata`. A shrinker may have removed `Metadata` and we should still check for `DefaultConstructorMarker`.
+
+
 ## Version 1.9.2
 
 _2019-11-17_

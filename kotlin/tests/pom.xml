@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.squareup.moshi</groupId>
     <artifactId>moshi-parent</artifactId>
-    <version>1.10.0-SNAPSHOT</version>
+    <version>1.11.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -116,7 +116,7 @@
         <configuration>
           <args>
             <arg>-Werror</arg>
-            <arg>-Xuse-experimental=kotlin.ExperimentalStdlibApi</arg>
+            <arg>-Xopt-in=kotlin.ExperimentalStdlibApi</arg>
               <arg>-XXLanguage:+InlineClasses</arg>
           </args>
         </configuration>

@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.squareup.moshi</groupId>
     <artifactId>moshi-parent</artifactId>
-    <version>1.10.0-SNAPSHOT</version>
+    <version>1.11.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -155,8 +155,8 @@
         <configuration>
           <args>
             <!-- So we can declare ourselves as users of KotlinPoetMetadataPreview -->
-            <arg>-Xuse-experimental=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview</arg>
-            <arg>-Xuse-experimental=kotlin.Experimental</arg>
+            <arg>-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview</arg>
+            <arg>-Xopt-in=kotlin.OptIn</arg>
           </args>
         </configuration>
       </plugin>
