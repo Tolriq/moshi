@@ -35,9 +35,9 @@
     <dokka.version>0.9.17</dokka.version>
     <incap.version>0.2</incap.version>
     <okio.version>1.16.0</okio.version>
-    <okio2.version>2.1.0</okio2.version>
+    <okio2.version>2.8.0</okio2.version>
     <kotlin.version>1.4.0</kotlin.version>
-    <kotlinpoet.version>1.5.0</kotlinpoet.version>
+    <kotlinpoet.version>1.6.0</kotlinpoet.version>
     <asm.version>7.1</asm.version>
     <kotlinx-metadata.version>0.1.0</kotlinx-metadata.version>
     <maven-assembly.version>3.1.0</maven-assembly.version>
@@ -46,7 +46,7 @@
     <assertj.version>3.11.1</assertj.version>
     <compile-testing.version>0.15</compile-testing.version>
     <junit.version>4.12</junit.version>
-    <kotlin-compile-testing.version>1.2.5</kotlin-compile-testing.version>
+    <kotlin-compile-testing.version>1.2.9</kotlin-compile-testing.version>
     <truth.version>1.0</truth.version>
   </properties>
 
