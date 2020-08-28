@@ -521,7 +521,6 @@ class JsonClassCodegenProcessorTest {
     }
   }
 
-  @Ignore("Temporarily ignored pending a new KCT release https://github.com/tschuchortdev/kotlin-compile-testing/issues/51")
   @Test
   fun `WriteOnly adapter should throw on write`() {
     val result = compile(kotlin("source.kt",
@@ -545,7 +544,6 @@ class JsonClassCodegenProcessorTest {
     }
   }
 
-  @Ignore("Temporarily ignored pending a new KCT release https://github.com/tschuchortdev/kotlin-compile-testing/issues/51")
   @Test
   fun `Adapter can't be readOnly and writeOnly`() {
     val result = compile(kotlin("source.kt",
@@ -563,7 +561,6 @@ class JsonClassCodegenProcessorTest {
     assertThat(result.messages).contains("@JsonClass can't be both readOnly and writeOnly")
   }
 
-  @Ignore("Temporarily ignored pending a new KCT release https://github.com/tschuchortdev/kotlin-compile-testing/issues/51")
   @Test
   fun `Processor should generate comprehensive proguard rules`() {
     val result = compile(
