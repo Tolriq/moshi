@@ -111,7 +111,20 @@ public class JsonClassCodegenProcessor : AbstractProcessor() {
       }
       val jsonClass = type.getAnnotation(annotation)
       if (jsonClass.generateAdapter && jsonClass.generator.isEmpty()) {
-        val generator = adapterGenerator(type, cachedClassInspector) ?: continue
+        if (jsonClass.readOnly && jsonClass.writeOnly) {
+          messager.printMessage(
+            Diagnostic.Kind.ERROR,
+            "@JsonClass can't be both readOnly and writeOnly",
+            type
+          )
+          continue
+        }
+        val generator = adapterGenerator(
+          type,
+          cachedClassInspector,
+          jsonClass.readOnly,
+          jsonClass.writeOnly
+        ) ?: continue
         val preparedAdapter = generator
           .prepare { spec ->
             spec.toBuilder()
@@ -143,7 +156,9 @@ public class JsonClassCodegenProcessor : AbstractProcessor() {
 
   private fun adapterGenerator(
     element: TypeElement,
-    cachedClassInspector: MoshiCachedClassInspector
+    cachedClassInspector: MoshiCachedClassInspector,
+    readOnly: Boolean,
+    writeOnly: Boolean
   ): AdapterGenerator? {
     val type = targetType(messager, elements, types, element, cachedClassInspector) ?: return null
 
@@ -175,6 +190,6 @@ public class JsonClassCodegenProcessor : AbstractProcessor() {
       }
     }
 
-    return AdapterGenerator(type, sortedProperties)
+    return AdapterGenerator(type, sortedProperties, readOnly, writeOnly)
   }
 }

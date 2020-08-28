@@ -28,3 +28,4 @@ obj
 
 # Temporary until generating a docsite
 docs/
+/local.properties
