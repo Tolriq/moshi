@@ -44,6 +44,7 @@ dependencies {
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
   }
   implementation(Dependencies.KotlinPoet.kotlinPoet)
+  kapt(Dependencies.KotlinPoet.kotlinPoet)
   shade(Dependencies.KotlinPoet.metadata) {
     exclude(group = "org.jetbrains.kotlin")
   }
