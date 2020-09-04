@@ -22,7 +22,7 @@ plugins {
   kotlin("jvm")
   kotlin("kapt")
   id("com.vanniktech.maven.publish")
-  id("com.github.johnrengelman.shadow") version "5.2.0"
+  id("com.github.johnrengelman.shadow") version "6.0.0"
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -38,26 +38,29 @@ tasks.withType<KotlinCompile>().configureEach {
 val shade: Configuration = configurations.maybeCreate("compileShaded")
 configurations.getByName("compileOnly").extendsFrom(shade)
 dependencies {
-  implementation(project(":moshi"))
-  implementation(kotlin("reflect"))
+  api(project(":moshi"))
+  api(kotlin("reflect"))
   shade(Dependencies.Kotlin.metadata) {
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
   }
-  implementation(Dependencies.KotlinPoet.kotlinPoet)
+  api(Dependencies.KotlinPoet.kotlinPoet)
   shade(Dependencies.KotlinPoet.metadata) {
     exclude(group = "org.jetbrains.kotlin")
+    exclude(group = "com.squareup", module = "kotlinpoet")
   }
   shade(Dependencies.KotlinPoet.metadataSpecs) {
     exclude(group = "org.jetbrains.kotlin")
+    exclude(group = "com.squareup", module = "kotlinpoet")
   }
   shade(Dependencies.KotlinPoet.elementsClassInspector) {
     exclude(group = "org.jetbrains.kotlin")
+    exclude(group = "com.squareup", module = "kotlinpoet")
   }
-  implementation(Dependencies.asm)
+  api(Dependencies.asm)
 
-  implementation(Dependencies.AutoService.annotations)
+  api(Dependencies.AutoService.annotations)
   kapt(Dependencies.AutoService.processor)
-  implementation(Dependencies.Incap.annotations)
+  api(Dependencies.Incap.annotations)
   kapt(Dependencies.Incap.processor)
 
   // Copy these again as they're not automatically included since they're shaded
@@ -104,7 +107,7 @@ afterEvaluate {
         // This is to properly wire the shadow jar's gradle metadata and pom information
         setArtifacts(artifacts.matching { it.classifier != "" })
         // Ugly but artifact() doesn't support TaskProviders
-        artifact(shadowJar.get())
+        artifact(shadowJar)
       }
     }
   }
